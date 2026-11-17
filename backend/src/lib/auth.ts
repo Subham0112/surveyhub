@@ -8,7 +8,7 @@ const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 function cookieOptions() {
   return {
     httpOnly: true,
-    sameSite: 'lax' as const,
+    sameSite: (env.cookieSecure ? 'none' : 'lax') as 'none' | 'lax',
     secure: env.cookieSecure,
     path: '/',
   };
