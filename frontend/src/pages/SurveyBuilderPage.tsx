@@ -720,10 +720,6 @@ export function SurveyBuilderPage() {
             <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line pb-3">
               <div>
                 <p className="mono-label">Questions</p>
-                <p className="mt-1 text-sm text-ink-soft">
-                  Add, remove and reorder the questions. Drag the handle to move a question.
-                  Conditional questions must follow the question they depend on.
-                </p>
               </div>
               <span className="mono-label">{questions.length} total</span>
             </div>
