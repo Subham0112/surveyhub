@@ -290,6 +290,16 @@ export function SurveyPage() {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (!successMessage) return;
+
+    const timer = window.setTimeout(() => {
+      setSuccessMessage('');
+    }, 4000);
+
+    return () => window.clearTimeout(timer);
+  }, [successMessage]);
+
   function focusFirstError(nextErrors: Record<string, string>) {
     const firstQuestionId = Object.keys(nextErrors)[0];
     const element = document.getElementById(`question-${firstQuestionId}`);

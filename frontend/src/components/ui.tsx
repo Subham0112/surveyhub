@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { buttonClasses, cn } from '../lib/styles';
 
@@ -61,20 +61,15 @@ export function Notice({
   autoHideMs?: number;
   onClose?: () => void;
 }) {
-  const [visible, setVisible] = useState(true);
-
   useEffect(() => {
     if (!autoHideMs || !onClose) return;
 
     const timer = window.setTimeout(() => {
-      setVisible(false);
       onClose();
     }, autoHideMs);
 
     return () => window.clearTimeout(timer);
   }, [autoHideMs, onClose]);
-
-  if (!visible) return null;
 
   const tones = {
     neutral: 'border-line-strong bg-surface text-ink-soft',
@@ -97,10 +92,7 @@ export function Notice({
           <button
             type="button"
             aria-label="Close alert"
-            onClick={() => {
-              setVisible(false);
-              onClose();
-            }}
+            onClick={onClose}
             className="ml-2 mt-0.5 rounded-md p-1 text-current/70 transition hover:bg-black/5 hover:text-current focus:outline-none focus:ring-2 focus:ring-current/30"
           >
             ×
