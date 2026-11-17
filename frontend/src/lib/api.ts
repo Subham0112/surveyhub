@@ -1,3 +1,4 @@
+import axios from 'axios';
 import type {
   AdminSurveySummary,
   Answers,
@@ -10,6 +11,14 @@ import type {
   UserSurvey,
   UserSurveySummary,
 } from './types';
+
+const API_BASE_URL = (import.meta.env.VITE_BACKEND_URL ?? '').replace(/\/+$/, '');
+const API_ROOT = API_BASE_URL ? (API_BASE_URL.endsWith('/api') ? API_BASE_URL : `${API_BASE_URL}/api`) : '/api';
+
+const apiClient = axios.create({
+  baseURL: API_ROOT,
+  withCredentials: true,
+});
 
 export class ApiError extends Error {
   status: number;
@@ -29,29 +38,32 @@ type RequestOptions = {
 };
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const response = await fetch(`/api${path}`, {
-    method: options.method ?? 'GET',
-    credentials: 'include',
-    headers: options.body === undefined ? undefined : { 'Content-Type': 'application/json' },
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
-  });
+  try {
+    const response = await apiClient.request<T>({
+      url: path,
+      method: options.method ?? 'GET',
+      data: options.body,
+      headers: options.body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    });
 
-  const hasBody = response.status !== 204;
-  const payload = hasBody ? await response.json().catch(() => ({})) : {};
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const payload = (error.response?.data ?? {}) as Record<string, unknown>;
+      const message =
+        typeof payload === 'object' && payload !== null && 'message' in payload
+          ? String(payload.message)
+          : error.message || 'The request could not be completed.';
+      const errors =
+        typeof payload === 'object' && payload !== null && 'errors' in payload
+          ? ((payload.errors as Record<string, string>) ?? undefined)
+          : undefined;
 
-  if (!response.ok) {
-    const message =
-      typeof payload === 'object' && payload !== null && 'message' in payload
-        ? String((payload as { message: unknown }).message)
-        : 'The request could not be completed.';
-    const errors =
-      typeof payload === 'object' && payload !== null && 'errors' in payload
-        ? ((payload as { errors?: Record<string, string> }).errors ?? undefined)
-        : undefined;
-    throw new ApiError(message, response.status, errors);
+      throw new ApiError(message, error.response?.status ?? 500, errors);
+    }
+
+    throw error;
   }
-
-  return payload as T;
 }
 
 export const api = {
