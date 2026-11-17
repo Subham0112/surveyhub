@@ -869,13 +869,7 @@ export function SurveyBuilderPage() {
             </div>
           </div>
 
-          <div data-reveal className="border border-line bg-surface p-4">
-            <p className="mono-label">Conditional logic</p>
-            <p className="mt-2 text-xs leading-relaxed text-muted">
-              A conditional question is only shown when an earlier answer matches. Answers
-              to hidden questions are not stored or required.
-            </p>
-          </div>
+       
         </aside>
       </div>
     </div>
