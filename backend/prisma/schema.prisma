@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+
+  surveys   Survey[]
+  responses Response[]
+}
+
+model Survey {
+  id          String       @id @default(cuid())
+  title       String
+  description String       @default("")
+  questions   Json
+  status      SurveyStatus @default(DRAFT)
+  adminId     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  admin     User       @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  responses Response[]
+
+  @@index([adminId])
+  @@index([status])
+}
+
+model Response {
+  id              String   @id @default(cuid())
+  surveyId        String
+  userId          String
+  answers         Json
+  seenQuestionIds String[] @default([])
+  submittedAt     DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([surveyId, userId])
+  @@index([surveyId])
+  @@index([userId])
+}
