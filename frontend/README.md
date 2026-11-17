@@ -1,4 +1,4 @@
-# Survey Builder Frontend
+# Survey HUB Frontend
 
 React, TypeScript, Tailwind CSS, and GSAP client for the Survey Builder application.
 

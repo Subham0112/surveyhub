@@ -1,7 +1,6 @@
-# Survey Builder
+# survey hub
 
-A full-stack survey application with an administrator survey builder, authenticated user
-responses, per-user completion history, conditional questions, and an analytics dashboard.
+A full-stack survey application with an administrator survey hub , authenticated user responses, per-user completion history, conditional questions, and an analytics dashboard.
 
 ## Features
 
@@ -84,13 +83,13 @@ SurveyBuilder/
 ### 1. Create the database
 
 ```bash
-createdb survey_builder
+createdb surveyhubdb
 ```
 
 Or from `psql`:
 
 ```sql
-CREATE DATABASE survey_builder;
+CREATE DATABASE surveyhubdb;
 ```
 
 ### 2. Configure and start the backend
@@ -145,7 +144,7 @@ Open `http://localhost:5173`. Vite proxies `/api` requests to the backend on por
 
 ### Default accounts
 
-- Administrator: `admin@surveybuilder.local` / `admin12345`
+- Administrator: can login with admin credentials
 - Users: create an account from the registration page.
 
 Change the administrator credentials in `backend/.env` before using this outside local
@@ -157,12 +156,10 @@ development.
 
 1. Sign in with the administrator account. You are redirected to `/admin`.
 2. Select **New survey**, enter the survey details, and add questions.
-3. Reorder questions with **Up** / **Down**, remove them, or mark them **Required**.
-4. For a conditional question, enable **Show this question conditionally** and choose the
-   earlier question, operator, and value.
+3. Reorder questions with by dragging it , remove them, or mark them **Required**.
+4. For a conditional question, enable **Show this question conditionally** and choose the earlier question, operator, and value.
 5. Select **Save survey**, then **Publish survey**.
-6. Open **Analytics** to see question-level results, the list of respondents, and each
-   respondent's answers.
+6. Open **Analytics** to see question-level results, the list of respondents, and each respondent's answers.
 
 ### User flow
 
@@ -170,7 +167,7 @@ development.
 2. The main page lists published surveys. Completed surveys show a **Completed** badge.
 3. Open a survey and answer the visible questions.
 4. After submitting, the survey is marked complete and appears on the **History** page.
-5. A second submission for the same survey is blocked.
+5. A second submission for the same survey is not allowed.
 
 ## API Overview
 
@@ -228,52 +225,25 @@ schema can remain flexible without adding a new table for every question type.
 
 ## Architecture Decisions
 
-- **JSON survey schema.** Surveys are dynamic, so the ordered question array is stored as
-  JSON in PostgreSQL. Prisma still manages users, surveys, and responses as relational
-  records.
-- **Separate controllers, middleware, and routes.** Routes only declare endpoints and
-  middleware. Business logic lives in controllers; authentication, validation, and error
-  handling live in dedicated middleware files.
-- **Request validation with Zod.** Login, registration, survey schemas, question
-  structures, and response payloads are validated before reaching the database.
-- **JWT in an HTTP-only cookie.** Tokens are never exposed to client JavaScript.
-  Authentication middleware reloads the user from the database and exposes the role for
-  authorization.
-- **Role-based protection.** Admin APIs require `ADMIN`; user APIs require authentication.
-  The frontend also has protected route wrappers, but server-side checks are authoritative.
-- **Conditional logic on both sides.** The form hides questions immediately, while the
-  backend recalculates visibility and ignores answers to hidden questions. This prevents
-  clients from submitting stale or unqualified answers.
-- **Analytics computed on read.** Counts, rating averages, and text lists are calculated
-  from stored responses when the dashboard is requested. This keeps writes simple and is
-  appropriate for small and medium response volumes.
-- **Minimal animation.** GSAP is used only for page and list entrances; reduced-motion
-  preferences are respected.
+- **JSON survey schema.** Surveys are dynamic, so the ordered question array is stored as JSON in PostgreSQL. Prisma still manages users, surveys, and responses as relational records.
+- **Separate controllers, middleware, and routes.** Routes only declare endpoints and middleware. Business logic lives in controllers; authentication, validation, and error handling live in dedicated middleware files.
+- **Request validation with Zod.** Login, registration, survey schemas, question structures, and response payloads are validated before reaching the database.
+- **JWT in an HTTP-only cookie.** Tokens are never exposed to client JavaScript. Authentication middleware reloads the user from the database and exposes the role for authorization.
+- **Role-based protection.** Admin APIs require `ADMIN`; user APIs require authentication. The frontend also has protected route wrappers, but server-side checks are authoritative.
+- **Conditional logic on both sides.** The form hides questions immediately, while the backend recalculates visibility and ignores answers to hidden questions. This prevents clients from submitting stale or unqualified answers.
+- **Analytics computed on read.** Counts, rating averages, and text lists are calculated from stored responses when the dashboard is requested.
+- **Minimal animation.** GSAP is used only for page and list entrances.
 
 ## Assumptions and Trade-offs
 
-- Authentication is required to view and answer surveys. The completed state and history
-  are tied to the signed-in user.
-- One response per user per survey is enforced with a database unique constraint. Users
-  cannot edit a response after submission.
-- There is no email verification, password reset, or account management screen. Users
-  register directly.
-- The administrator account is created by the seed script instead of a public admin
-  registration form.
-- Editing a survey after responses exist keeps existing answers by question ID. Renaming a
-  question is safe; deleting a question or changing options can make older answers harder
-  to interpret in analytics.
-- Unpublishing a survey removes it from the user survey list, but stored responses and the
-  respondents' history remain. Users can still open a completed survey from their history and
-  review their submitted answers in read-only mode.
-- JWT cookies expire after seven days and there is no refresh-token rotation. CSRF
-  protection is not implemented because authentication uses a same-site HTTP-only cookie
-  and the app is expected to run behind the same origin in development. A production
-  deployment should add an explicit CSRF strategy and secure cookies.
-- Analytics are read-time calculations. At large scale, aggregate tables or cached
-  metrics would be preferable.
-- No file uploads, pagination, or advanced export features are included, to keep the scope
-  aligned with the requirements.
+- Authentication is required to view and answer surveys. The completed state and history are tied to the signed-in user.
+- One response per user per survey is enforced with a database unique constraint. Users cannot edit a response after submission.
+- The administrator account is created by the seed script instead of a public admin registration form.
+- Editing a survey after responses exist keeps existing answers by question ID. Renaming a question is safe; deleting a question or changing options can make older answers harder to interpret in analytics.
+- Unpublishing a survey removes it from the user survey list, but stored responses and the respondents' history remain. Users can still open a completed survey from their history and review their submitted answers in read-only mode.
+
+- Analytics are read-time calculations. 
+- No file uploads, pagination, or advanced export features are included.
 
 ## Commands
 
