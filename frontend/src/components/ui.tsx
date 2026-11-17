@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { buttonClasses, cn } from '../lib/styles';
 
@@ -53,23 +53,34 @@ export function LoadingBlock({ label = 'Loading' }: { label?: string }) {
 export function Notice({
   children,
   tone = 'neutral',
-  autoHideMs,
+  autoHideMs = 5000,
   onClose,
 }: {
   children: ReactNode;
   tone?: 'neutral' | 'error' | 'success';
-  autoHideMs?: number;
+  autoHideMs?: number | null;
   onClose?: () => void;
 }) {
+  const [visible, setVisible] = useState(true);
+
+  function close() {
+    setVisible(false);
+    onClose?.();
+  }
+
+  // Re-show and restart the timer whenever the message changes
   useEffect(() => {
-    if (!autoHideMs || !onClose) return;
+    setVisible(true);
+  }, [children]);
 
-    const timer = window.setTimeout(() => {
-      onClose();
-    }, autoHideMs);
-
+  useEffect(() => {
+    if (!autoHideMs || !visible) return;
+    const timer = window.setTimeout(close, autoHideMs);
     return () => window.clearTimeout(timer);
-  }, [autoHideMs, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoHideMs, visible, children]);
+
+  if (!visible) return null;
 
   const tones = {
     neutral: 'border-line-strong bg-surface text-ink-soft',
@@ -88,16 +99,14 @@ export function Notice({
     >
       <div className="flex items-start gap-3">
         <div className="flex-1 leading-relaxed">{children}</div>
-        {onClose ? (
-          <button
-            type="button"
-            aria-label="Close alert"
-            onClick={onClose}
-            className="ml-2 mt-0.5 rounded-md p-1 text-current/70 transition hover:bg-black/5 hover:text-current focus:outline-none focus:ring-2 focus:ring-current/30"
-          >
-            ×
-          </button>
-        ) : null}
+        <button
+          type="button"
+          aria-label="Close alert"
+          onClick={close}
+          className="-mr-1 -mt-0.5 rounded-md px-2 py-0.5 text-lg leading-none opacity-70 transition hover:bg-black/5 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-current/30"
+        >
+          ×
+        </button>
       </div>
     </div>
   );

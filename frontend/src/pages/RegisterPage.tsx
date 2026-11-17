@@ -55,7 +55,7 @@ export function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
-        {error ? <Notice tone="error">{error}</Notice> : null}
+        {error ? <Notice tone="error" onClose={() => setError('')}>{error}</Notice> : null}
 
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>

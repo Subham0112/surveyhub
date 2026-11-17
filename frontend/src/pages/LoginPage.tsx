@@ -48,7 +48,7 @@ export function LoginPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
-        {error ? <Notice tone="error">{error}</Notice> : null}
+       {error ? <Notice tone="error" onClose={() => setError('')}>{error}</Notice> : null}
 
         <div>
           <label htmlFor="email" className="mono-label mb-2 block">
