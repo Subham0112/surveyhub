@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { buttonClasses, cn } from '../lib/styles';
 
@@ -52,10 +53,29 @@ export function LoadingBlock({ label = 'Loading' }: { label?: string }) {
 export function Notice({
   children,
   tone = 'neutral',
+  autoHideMs,
+  onClose,
 }: {
   children: ReactNode;
   tone?: 'neutral' | 'error' | 'success';
+  autoHideMs?: number;
+  onClose?: () => void;
 }) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    if (!autoHideMs || !onClose) return;
+
+    const timer = window.setTimeout(() => {
+      setVisible(false);
+      onClose();
+    }, autoHideMs);
+
+    return () => window.clearTimeout(timer);
+  }, [autoHideMs, onClose]);
+
+  if (!visible) return null;
+
   const tones = {
     neutral: 'border-line-strong bg-surface text-ink-soft',
     error: 'border-accent/40 bg-accent-soft text-accent-deep',
@@ -63,8 +83,30 @@ export function Notice({
   } as const;
 
   return (
-    <div className={cn('rounded-[2px] border px-4 py-3 text-sm', tones[tone])} role={tone === 'error' ? 'alert' : undefined}>
-      {children}
+    <div
+      className={cn(
+        'fixed left-1/2 top-4 z-[100] w-[min(92vw,32rem)] -translate-x-1/2 rounded-xl border px-4 py-3 text-sm shadow-lg shadow-black/10 backdrop-blur-sm',
+        tones[tone],
+      )}
+      role={tone === 'error' ? 'alert' : 'status'}
+      aria-live={tone === 'error' ? 'assertive' : 'polite'}
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex-1 leading-relaxed">{children}</div>
+        {onClose ? (
+          <button
+            type="button"
+            aria-label="Close alert"
+            onClick={() => {
+              setVisible(false);
+              onClose();
+            }}
+            className="ml-2 mt-0.5 rounded-md p-1 text-current/70 transition hover:bg-black/5 hover:text-current focus:outline-none focus:ring-2 focus:ring-current/30"
+          >
+            ×
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

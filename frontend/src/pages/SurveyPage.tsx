@@ -480,9 +480,9 @@ export function SurveyPage() {
           )}
 
           {successMessage ? (
-            <div className="mt-4">
-              <Notice tone="success">{successMessage}</Notice>
-            </div>
+            <Notice tone="success" autoHideMs={4000} onClose={() => setSuccessMessage('')}>
+              {successMessage}
+            </Notice>
           ) : null}
         </div>
 
