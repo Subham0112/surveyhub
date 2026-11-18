@@ -11,6 +11,23 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { SurveyBuilderPage } from './pages/SurveyBuilderPage';
 import { SurveyPage } from './pages/SurveyPage';
+import { useAuth } from './context/auth';
+
+function SessionLoadingPage() {
+  return (
+    <div className="grid min-h-svh place-items-center bg-paper px-6">
+      <div className="flex flex-col items-center gap-5">
+        <span className="grid h-10 w-10 place-items-center border border-ink bg-ink font-mono text-[11px] tracking-[0.08em] text-paper">
+          SH
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="h-3 w-3 animate-pulse rounded-full bg-accent" />
+          <span className="mono-label">Loading Survey Hub</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -23,6 +40,10 @@ function ScrollToTop() {
 }
 
 function App() {
+  const { loading } = useAuth();
+
+  if (loading) return <SessionLoadingPage />;
+
   return (
     <>
       <ScrollToTop />

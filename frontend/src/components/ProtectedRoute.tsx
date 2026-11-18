@@ -1,21 +1,11 @@
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/auth';
-import { LoadingBlock } from './ui';
-
-function SessionGate() {
-  return (
-    <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-      <LoadingBlock label="Checking session" />
-    </div>
-  );
-}
 
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
 
-  if (loading) return <SessionGate />;
   if (!user) {
     return (
       <Navigate
@@ -30,10 +20,9 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 export function RequireAdmin({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
 
-  if (loading) return <SessionGate />;
   if (!user) {
     return (
       <Navigate
